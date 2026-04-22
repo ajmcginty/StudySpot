@@ -8,17 +8,22 @@
 import SwiftUI
 
 struct ContentView: View {
-    var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
-        }
-        .padding()
-    }
-}
+    // Single SpotsViewModel shared across both tabs — one Firestore listener for the whole app
+    @State private var spotsViewModel = SpotsViewModel()
 
-#Preview {
-    ContentView()
+    var body: some View {
+        TabView {
+            SpotMapView(viewModel: spotsViewModel)
+                .tabItem {
+                    Label("Map", systemImage: "map")
+                }
+
+            SpotListView(viewModel: spotsViewModel)
+                .tabItem {
+                    Label("List", systemImage: "list.bullet")
+                }
+        }
+        .onAppear { spotsViewModel.startListening() }
+        .onDisappear { spotsViewModel.stopListening() }
+    }
 }
