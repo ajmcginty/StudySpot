@@ -2,6 +2,7 @@ import Foundation
 import FirebaseFirestore
 import SwiftUI
 import Observation
+internal import _LocationEssentials
 
 @Observable
 class AddSpotViewModel {
@@ -47,7 +48,10 @@ class AddSpotViewModel {
         spot.postedBy = postedBy
         spot.datePosted = Date()
 
+        // NOTE: setData(from:) on an explicit document ref is the async/throws Codable path;
+        // addDocument(from:) is synchronous so can't be used with try? await
         let db = Firestore.firestore()
-        try? await db.collection("studySpots").addDocument(from: spot)
+        let ref = db.collection("studySpots").document()
+        try? await ref.setData(from: spot)
     }
 }

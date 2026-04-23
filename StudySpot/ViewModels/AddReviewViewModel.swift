@@ -33,8 +33,9 @@ class AddReviewViewModel {
         let db = Firestore.firestore()
         let spotRef = db.collection("studySpots").document(spotID)
 
-        // Write review to subcollection
-        try? await spotRef.collection("reviews").addDocument(from: review)
+        // NOTE: setData(from:) on an explicit document ref is the async/throws Codable path
+        let reviewRef = spotRef.collection("reviews").document()
+        try? await reviewRef.setData(from: review)
 
         // Recalculate average and update parent spot in the same operation
         let newCount = spot.reviewCount + 1

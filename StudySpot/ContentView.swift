@@ -8,22 +8,28 @@
 import SwiftUI
 
 struct ContentView: View {
-    // Single SpotsViewModel shared across both tabs — one Firestore listener for the whole app
+    // Shared across both tabs — one Firestore listener and one location manager for the whole app
     @State private var spotsViewModel = SpotsViewModel()
+    @State private var locationManager = LocationManager()
+    @State private var displayName: String = UserDefaults.standard.string(forKey: "displayName") ?? ""
 
     var body: some View {
-        TabView {
-            SpotMapView(viewModel: spotsViewModel)
-                .tabItem {
-                    Label("Map", systemImage: "map")
-                }
+        if displayName.isEmpty {
+            DisplayNameView(displayName: $displayName)
+        } else {
+            TabView {
+                SpotMapView(viewModel: spotsViewModel, locationManager: locationManager)
+                    .tabItem {
+                        Label("Map", systemImage: "map")
+                    }
 
-            SpotListView(viewModel: spotsViewModel)
-                .tabItem {
-                    Label("List", systemImage: "list.bullet")
-                }
+                SpotListView(viewModel: spotsViewModel)
+                    .tabItem {
+                        Label("List", systemImage: "list.bullet")
+                    }
+            }
+            .onAppear { spotsViewModel.startListening() }
+            .onDisappear { spotsViewModel.stopListening() }
         }
-        .onAppear { spotsViewModel.startListening() }
-        .onDisappear { spotsViewModel.stopListening() }
     }
 }

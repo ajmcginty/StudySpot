@@ -2,10 +2,31 @@ import Foundation
 import FirebaseFirestore
 import Observation
 
+enum SpotFilter: String, CaseIterable {
+    case all = "All"
+    case openNow = "Open Now"
+    case quiet = "Quiet"
+    case hasOutlets = "Outlets"
+}
+
 @Observable
 class SpotsViewModel {
     var spots: [StudySpot] = []
+    var activeFilter: SpotFilter = .all
     private var listener: ListenerRegistration?
+
+    // Filtered + sorted list used by SpotListView — open spots always float to the top
+    var filteredSpots: [StudySpot] {
+        let filtered = spots.filter { spot in
+            switch activeFilter {
+            case .all:        return true
+            case .openNow:    return spot.isOpenNow
+            case .quiet:      return spot.noiseLevel == "quiet"
+            case .hasOutlets: return spot.hasOutlets
+            }
+        }
+        return filtered.sorted { $0.isOpenNow && !$1.isOpenNow }
+    }
 
     func startListening() {
         let db = Firestore.firestore()
