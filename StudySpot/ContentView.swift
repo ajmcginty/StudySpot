@@ -30,6 +30,10 @@ struct ContentView: View {
             }
             .onAppear { spotsViewModel.startListening() }
             .onDisappear { spotsViewModel.stopListening() }
+            // Keep the ViewModel's location in sync so Distance sorting works
+            .onChange(of: locationManager.lastLocation) { _, newLocation in
+                spotsViewModel.userLocation = newLocation
+            }
         }
     }
 }

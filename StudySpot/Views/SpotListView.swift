@@ -2,7 +2,6 @@ import SwiftUI
 
 struct SpotListView: View {
     @Bindable var viewModel: SpotsViewModel
-    @State private var selectedSpot: StudySpot?
 
     var body: some View {
         NavigationStack {
@@ -17,19 +16,13 @@ struct SpotListView: View {
                 .padding()
 
                 List(viewModel.filteredSpots) { spot in
-                    Button {
-                        selectedSpot = spot
-                    } label: {
+                    NavigationLink(destination: SpotDetailSheet(spot: spot)) {
                         SpotRow(spot: spot)
                     }
-                    .buttonStyle(.plain)
                 }
                 .listStyle(.plain)
             }
             .navigationTitle("Study Spots")
-        }
-        .sheet(item: $selectedSpot) { spot in
-            SpotDetailSheet(spot: spot)
         }
     }
 }
@@ -38,25 +31,22 @@ private struct SpotRow: View {
     var spot: StudySpot
 
     var body: some View {
-        HStack(spacing: 12) {
-            VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack {
                 Text(spot.name)
                     .font(.title3)
                     .fontWeight(.semibold)
-
-                HStack(spacing: 6) {
-                    Image(systemName: noiseLevelIcon)
-                        .foregroundStyle(.secondary)
-                    Text(spot.noiseLevel.capitalized)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
+                Spacer()
+                OpenBadge(isOpen: spot.isOpenNow)
             }
 
-            Spacer()
-
-            VStack(alignment: .trailing, spacing: 4) {
-                OpenBadge(isOpen: spot.isOpenNow)
+            HStack(spacing: 6) {
+                Image(systemName: noiseLevelIcon)
+                    .foregroundStyle(.secondary)
+                Text(spot.noiseLevel.capitalized)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Spacer()
                 StarRatingView(rating: spot.averageRating)
             }
         }
