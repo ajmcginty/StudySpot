@@ -1,8 +1,8 @@
 import Foundation
 import FirebaseFirestore
 import SwiftUI
+import CoreLocation
 import Observation
-internal import _LocationEssentials
 
 @Observable
 class AddSpotViewModel {
@@ -15,18 +15,24 @@ class AddSpotViewModel {
     var hasOutlets: Bool = false
     var hasWifi: Bool = false
     var goodForGroups: Bool = false
-    var latitude: Double = 0.0
-    var longitude: Double = 0.0
+    var selectedCoordinate: CLLocationCoordinate2D? = nil
     var selectedImage: UIImage? = nil
     var postedBy: String = ""
 
-    func autofillLocation(from locationManager: LocationManager) {
-        guard let location = locationManager.lastLocation else { return }
-        latitude = location.coordinate.latitude
-        longitude = location.coordinate.longitude
+    // Returns existing spots within 150m of the placed pin
+    func nearbySpots(in spots: [StudySpot]) -> [StudySpot] {
+        guard let coord = selectedCoordinate else { return [] }
+        let pinLocation = CLLocation(latitude: coord.latitude, longitude: coord.longitude)
+        return spots.filter { spot in
+            let spotLocation = CLLocation(latitude: spot.latitude, longitude: spot.longitude)
+            return spotLocation.distance(from: pinLocation) <= 150
+        }
     }
 
-    func save() async {
+    // Returns the new spot's Firestore document ID so the caller can immediately prompt for a review
+    func save() async -> String? {
+        guard let coord = selectedCoordinate else { return nil }
+
         var imageURL = ""
         if let image = selectedImage {
             imageURL = await ImageUploader.upload(image: image) ?? ""
@@ -35,8 +41,8 @@ class AddSpotViewModel {
         var spot = StudySpot()
         spot.name = name
         spot.description = description
-        spot.latitude = latitude
-        spot.longitude = longitude
+        spot.latitude = coord.latitude
+        spot.longitude = coord.longitude
         spot.imageURL = imageURL
         spot.hoursOpen = hoursOpen
         spot.hoursClose = hoursClose
@@ -53,5 +59,6 @@ class AddSpotViewModel {
         let db = Firestore.firestore()
         let ref = db.collection("studySpots").document()
         try? await ref.setData(from: spot)
+        return ref.documentID
     }
 }
