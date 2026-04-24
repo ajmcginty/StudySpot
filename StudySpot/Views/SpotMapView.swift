@@ -7,7 +7,15 @@ struct SpotMapView: View {
 
     @State private var selectedSpot: StudySpot?
     @State private var showAddSpot = false
-    @State private var position: MapCameraPosition = .automatic
+    // userLocation(fallback:) lets MapKit zoom to the user as soon as the first fix arrives,
+    // avoiding the race condition where .automatic renders as the whole world on cold start
+    @State private var position: MapCameraPosition = .userLocation(
+        fallback: .region(MKCoordinateRegion(
+            center: CLLocationCoordinate2D(latitude: 42.3355, longitude: -71.1685),
+            latitudinalMeters: 1500,
+            longitudinalMeters: 1500
+        ))
+    )
 
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
@@ -30,16 +38,6 @@ struct SpotMapView: View {
                 }
             }
             .ignoresSafeArea()
-            .onAppear {
-                // Center on user's location if available; otherwise MapKit picks a default
-                if let location = locationManager.lastLocation {
-                    position = .region(MKCoordinateRegion(
-                        center: location.coordinate,
-                        latitudinalMeters: 1500,
-                        longitudinalMeters: 1500
-                    ))
-                }
-            }
 
             Button {
                 showAddSpot = true
@@ -56,7 +54,7 @@ struct SpotMapView: View {
         }
         .sheet(isPresented: $showAddSpot) {
             NavigationStack {
-                AddSpotView(locationManager: locationManager)
+                AddSpotView(locationManager: locationManager, spots: viewModel.spots)
             }
         }
     }
