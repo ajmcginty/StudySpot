@@ -19,6 +19,7 @@ struct AddSpotView: View {
     @State private var selectedPhotoItem: PhotosPickerItem?
     // Set after the spot saves — triggers the review sheet and then dismisses this sheet
     @State private var savedSpot: StudySpot? = nil
+    @State private var showSaveError = false
 
     private let noiseOptions = ["quiet", "moderate", "loud"]
     private let timeFormatter: DateFormatter = {
@@ -124,6 +125,8 @@ struct AddSpotView: View {
                             spot.id = spotID
                             spot.name = viewModel.name
                             savedSpot = spot
+                        } else if viewModel.saveError != nil {
+                            showSaveError = true
                         } else {
                             dismiss()
                         }
@@ -148,13 +151,10 @@ struct AddSpotView: View {
                 dismiss()
             }
         }
-        .alert("Save Failed", isPresented: Binding(
-            get: { viewModel.saveError != nil },
-            set: { if !$0 { viewModel.saveError = nil } }
-        )) {
-            Button("OK", role: .cancel) { viewModel.saveError = nil }
+        .alert("Save Failed", isPresented: $showSaveError) {
+            Button("OK", role: .cancel) { }
         } message: {
-            Text(viewModel.saveError ?? "")
+            Text(viewModel.saveError ?? "Something went wrong. Please try again.")
         }
     }
 }

@@ -6,6 +6,7 @@ struct AddReviewView: View {
     @Environment(\.dismiss) var dismiss
     @State private var viewModel = AddReviewViewModel()
     @State private var selectedPhotoItem: PhotosPickerItem?
+    @State private var showSaveError = false
 
     private let busynessOptions = ["empty", "moderate", "packed"]
 
@@ -62,7 +63,11 @@ struct AddReviewView: View {
                     viewModel.postedBy = UserDefaults.standard.string(forKey: "displayName") ?? ""
                     Task {
                         let success = await viewModel.save(for: spot)
-                        if success { dismiss() }
+                        if success {
+                            dismiss()
+                        } else {
+                            showSaveError = true
+                        }
                     }
                 }
             }
@@ -70,13 +75,10 @@ struct AddReviewView: View {
                 Button("Cancel") { dismiss() }
             }
         }
-        .alert("Save Failed", isPresented: Binding(
-            get: { viewModel.saveError != nil },
-            set: { if !$0 { viewModel.saveError = nil } }
-        )) {
-            Button("OK", role: .cancel) { viewModel.saveError = nil }
+        .alert("Save Failed", isPresented: $showSaveError) {
+            Button("OK", role: .cancel) { }
         } message: {
-            Text(viewModel.saveError ?? "")
+            Text(viewModel.saveError ?? "Something went wrong. Please try again.")
         }
     }
 }

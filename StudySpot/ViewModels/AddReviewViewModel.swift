@@ -32,10 +32,9 @@ class AddReviewViewModel {
         let spotRef = db.collection("studySpots").document(spotID)
 
         // NOTE: setData(from:) on an explicit document ref is the async/throws Codable path
+        // try? returns nil on failure so we can detect and surface the error without do/catch
         let reviewRef = spotRef.collection("reviews").document()
-        do {
-            try await reviewRef.setData(from: review)
-        } catch {
+        if (try? await reviewRef.setData(from: review)) == nil {
             saveError = "Couldn't save your review. Please try again."
             return false
         }
@@ -44,13 +43,11 @@ class AddReviewViewModel {
         let newCount = spot.reviewCount + 1
         let newAverage = ((spot.averageRating * Double(spot.reviewCount)) + Double(rating)) / Double(newCount)
 
-        do {
-            try await spotRef.updateData([
-                "averageRating": newAverage,
-                "reviewCount": newCount,
-                "busyness": busynessReport
-            ])
-        } catch {
+        if (try? await spotRef.updateData([
+            "averageRating": newAverage,
+            "reviewCount": newCount,
+            "busyness": busynessReport
+        ])) == nil {
             saveError = "Review saved, but rating couldn't update. Please try again."
             return false
         }

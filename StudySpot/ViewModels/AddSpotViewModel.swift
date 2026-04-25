@@ -59,9 +59,7 @@ class AddSpotViewModel {
         // addDocument(from:) is synchronous so can't be used with try? await
         let db = Firestore.firestore()
         let ref = db.collection("studySpots").document()
-        do {
-            try await ref.setData(from: spot)
-        } catch {
+        if (try? await ref.setData(from: spot)) == nil {
             saveError = "Couldn't save this spot. Please try again."
             return nil
         }
