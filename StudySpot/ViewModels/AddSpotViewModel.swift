@@ -18,6 +18,7 @@ class AddSpotViewModel {
     var selectedCoordinate: CLLocationCoordinate2D? = nil
     var selectedImage: UIImage? = nil
     var postedBy: String = ""
+    var saveError: String? = nil
 
     // Returns existing spots within 150m of the placed pin
     func nearbySpots(in spots: [StudySpot]) -> [StudySpot] {
@@ -58,7 +59,12 @@ class AddSpotViewModel {
         // addDocument(from:) is synchronous so can't be used with try? await
         let db = Firestore.firestore()
         let ref = db.collection("studySpots").document()
-        try? await ref.setData(from: spot)
+        do {
+            try await ref.setData(from: spot)
+        } catch {
+            saveError = "Couldn't save this spot. Please try again."
+            return nil
+        }
         return ref.documentID
     }
 }

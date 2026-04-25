@@ -18,7 +18,5 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         lastLocation = locations.last
     }
 
-    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        print("LocationManager: \(error.localizedDescription)")
-    }
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) { }
 }

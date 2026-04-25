@@ -12,6 +12,7 @@ enum SpotFilter: String, CaseIterable {
 @Observable
 class SpotsViewModel {
     var spots: [StudySpot] = []
+    var isLoading: Bool = true
     var activeFilter: SpotFilter = .all
     // Updated by ContentView whenever LocationManager gets a new fix
     var userLocation: CLLocation?
@@ -48,12 +49,13 @@ class SpotsViewModel {
         listener = db.collection("studySpots")
             .addSnapshotListener { snapshot, error in
                 if let error {
-                    print("SpotsViewModel: error listening to studySpots — \(error.localizedDescription)")
+                    self.isLoading = false
                     return
                 }
                 self.spots = snapshot?.documents.compactMap {
                     try? $0.data(as: StudySpot.self)
                 } ?? []
+                self.isLoading = false
             }
     }
 

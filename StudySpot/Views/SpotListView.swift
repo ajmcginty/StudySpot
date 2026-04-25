@@ -15,12 +15,26 @@ struct SpotListView: View {
                 .pickerStyle(.segmented)
                 .padding()
 
-                List(viewModel.filteredSpots) { spot in
-                    NavigationLink(destination: SpotDetailSheet(spot: spot)) {
-                        SpotRow(spot: spot)
+                if viewModel.isLoading {
+                    ProgressView("Loading spots…")
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else if viewModel.filteredSpots.isEmpty {
+                    ContentUnavailableView(
+                        viewModel.activeFilter == .openNow ? "No Open Spots" : "No Spots Yet",
+                        systemImage: viewModel.activeFilter == .openNow ? "clock" : "mappin.slash",
+                        description: Text(viewModel.activeFilter == .openNow
+                            ? "There are no spots open right now."
+                            : "Be the first to add a study spot!")
+                    )
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    List(viewModel.filteredSpots) { spot in
+                        NavigationLink(destination: SpotDetailSheet(spot: spot)) {
+                            SpotRow(spot: spot)
+                        }
                     }
+                    .listStyle(.plain)
                 }
-                .listStyle(.plain)
             }
             .navigationTitle("Study Spots")
         }

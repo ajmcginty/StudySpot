@@ -148,5 +148,13 @@ struct AddSpotView: View {
                 dismiss()
             }
         }
+        .alert("Save Failed", isPresented: Binding(
+            get: { viewModel.saveError != nil },
+            set: { if !$0 { viewModel.saveError = nil } }
+        )) {
+            Button("OK", role: .cancel) { viewModel.saveError = nil }
+        } message: {
+            Text(viewModel.saveError ?? "")
+        }
     }
 }

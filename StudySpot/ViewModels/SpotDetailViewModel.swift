@@ -15,7 +15,6 @@ class SpotDetailViewModel {
             .order(by: "datePosted", descending: true)
             .addSnapshotListener { snapshot, error in
                 if let error {
-                    print("SpotDetailViewModel: error listening to reviews — \(error.localizedDescription)")
                     return
                 }
                 self.reviews = snapshot?.documents.compactMap {

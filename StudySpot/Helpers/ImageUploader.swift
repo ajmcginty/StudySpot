@@ -14,7 +14,6 @@ struct ImageUploader {
             let url = try await storageRef.downloadURL()
             return url.absoluteString
         } catch {
-            print("ImageUploader: upload failed — \(error.localizedDescription)")
             return nil
         }
     }

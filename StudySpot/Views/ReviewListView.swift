@@ -4,6 +4,13 @@ struct ReviewListView: View {
     var reviews: [Review]
 
     var body: some View {
+        if reviews.isEmpty {
+            ContentUnavailableView(
+                "No Reviews Yet",
+                systemImage: "star.slash",
+                description: Text("Be the first to rate this spot!")
+            )
+        } else {
         List(reviews) { review in
             VStack(alignment: .leading, spacing: 8) {
 
@@ -55,5 +62,6 @@ struct ReviewListView: View {
         }
         .listStyle(.plain)
         .navigationTitle("Reviews")
+        }
     }
 }

@@ -61,14 +61,22 @@ struct AddReviewView: View {
                 Button("Save") {
                     viewModel.postedBy = UserDefaults.standard.string(forKey: "displayName") ?? ""
                     Task {
-                        await viewModel.save(for: spot)
-                        dismiss()
+                        let success = await viewModel.save(for: spot)
+                        if success { dismiss() }
                     }
                 }
             }
             ToolbarItem(placement: .cancellationAction) {
                 Button("Cancel") { dismiss() }
             }
+        }
+        .alert("Save Failed", isPresented: Binding(
+            get: { viewModel.saveError != nil },
+            set: { if !$0 { viewModel.saveError = nil } }
+        )) {
+            Button("OK", role: .cancel) { viewModel.saveError = nil }
+        } message: {
+            Text(viewModel.saveError ?? "")
         }
     }
 }

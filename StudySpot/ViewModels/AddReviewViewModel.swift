@@ -10,12 +10,10 @@ class AddReviewViewModel {
     var busynessReport: String = "moderate"
     var selectedImage: UIImage? = nil
     var postedBy: String = ""
+    var saveError: String? = nil
 
-    func save(for spot: StudySpot) async {
-        guard let spotID = spot.id else {
-            print("AddReviewViewModel: spot has no ID — cannot save review")
-            return
-        }
+    func save(for spot: StudySpot) async -> Bool {
+        guard let spotID = spot.id else { return false }
 
         var imageURL = ""
         if let image = selectedImage {
@@ -35,16 +33,28 @@ class AddReviewViewModel {
 
         // NOTE: setData(from:) on an explicit document ref is the async/throws Codable path
         let reviewRef = spotRef.collection("reviews").document()
-        try? await reviewRef.setData(from: review)
+        do {
+            try await reviewRef.setData(from: review)
+        } catch {
+            saveError = "Couldn't save your review. Please try again."
+            return false
+        }
 
         // Recalculate average and update parent spot in the same operation
         let newCount = spot.reviewCount + 1
         let newAverage = ((spot.averageRating * Double(spot.reviewCount)) + Double(rating)) / Double(newCount)
 
-        try? await spotRef.updateData([
-            "averageRating": newAverage,
-            "reviewCount": newCount,
-            "busyness": busynessReport
-        ])
+        do {
+            try await spotRef.updateData([
+                "averageRating": newAverage,
+                "reviewCount": newCount,
+                "busyness": busynessReport
+            ])
+        } catch {
+            saveError = "Review saved, but rating couldn't update. Please try again."
+            return false
+        }
+
+        return true
     }
 }
