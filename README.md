@@ -12,6 +12,9 @@ A community-driven iOS app for discovering and reviewing study spots around camp
 - **MVVM Architecture** — `@Observable` ViewModels managing all data and business logic
 - **Xcode 26 / iOS 26** — built and tested on the latest Apple developer toolchain
 
+## Demo Video
+[![Demo Video](https://img.youtube.com/vi/cOpMmKXQubw/0.jpg)](https://www.youtube.com/shorts/cOpMmKXQubw)
+
 ## Contact
 
 - **LinkedIn:** [linkedin.com/in/aidan-mcginty1](https://www.linkedin.com/in/aidan-mcginty1)
